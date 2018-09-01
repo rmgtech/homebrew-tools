@@ -4,8 +4,8 @@ cask 'docker' do
 
   url "https://download.docker.com/mac/stable/#{version.after_comma}/Docker.dmg"
   appcast 'https://download.docker.com/mac/stable/appcast.xml'
-  name 'Docker Community Edition'
-  name 'Docker CE'
+  name 'Lightstack: Docker Community Edition'
+  name 'Lightstack: Docker CE'
   homepage 'https://www.docker.com/community-edition'
 
   auto_updates true
