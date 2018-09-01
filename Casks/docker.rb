@@ -1,4 +1,4 @@
-cask 'lsdocker' do
+cask 'docker' do
   version '18.06.1-ce-mac73,26764'
   sha256 '3429eac38cf0d198039ad6e1adce0016f642cdb914a34c67ce40f069cdb047a5'
 
