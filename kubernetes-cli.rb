@@ -1,35 +1,33 @@
 class KubernetesCli < Formula
-  desc "lightstack: Kubernetes command-line interface"
+  desc "Kubernetes command-line interface"
   homepage "https://kubernetes.io/"
   url "https://github.com/kubernetes/kubernetes.git",
-      :tag => "v1.11.2",
-      :revision => "bb9ffb1654d4a729bb4cec18ff088eacc153c239"
+      :tag      => "v1.13.3",
+      :revision => "721bfa751924da8d1680787490c54b9179b1fed0"
   head "https://github.com/kubernetes/kubernetes.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "2794644a5ce43c91576c1dd0369da9562ced1ece3d9455bee0b6c61261f82506" => :mojave
-    sha256 "2390f75150264b6dee789106671f7d995d61d81ed52a800925334da012dc0204" => :high_sierra
-    sha256 "855927df1978fca13ded232565a6549188efe6fccc8649ac2e4d7fb95dcb2d26" => :sierra
-    sha256 "1e1592e19457cd85bbac9cf0ce913920e8ecd7d735067974640f30873489e2e8" => :el_capitan
+    sha256 "114783b3abc9a0a0292d24f7d6196bef46fcbdd452a27d1871c9202cdbfa27a4" => :mojave
+    sha256 "12ed2e4506e9269ad802a634936376130351de45998eaf2b4fb52a3c997b4a3b" => :high_sierra
+    sha256 "204f22c9cfe97375d112c64c77c071ba0703030f633eeb6aacce8c714db5859f" => :sierra
   end
 
   depends_on "go" => :build
 
   def install
     ENV["GOPATH"] = buildpath
-    arch = MacOS.prefer_64_bit? ? "amd64" : "x86"
     dir = buildpath/"src/k8s.io/kubernetes"
     dir.install buildpath.children - [buildpath/".brew_home"]
 
     cd dir do
-      # Race condition still exists in OSX Yosemite
+      # Race condition still exists in OS X Yosemite
       # Filed issue: https://github.com/kubernetes/kubernetes/issues/34635
       ENV.deparallelize { system "make", "generated_files" }
 
       # Make binary
       system "make", "kubectl"
-      bin.install "_output/local/bin/darwin/#{arch}/kubectl"
+      bin.install "_output/local/bin/darwin/amd64/kubectl"
 
       # Install bash completion
       output = Utils.popen_read("#{bin}/kubectl completion bash")
@@ -54,7 +52,10 @@ class KubernetesCli < Formula
 
     version_output = shell_output("#{bin}/kubectl version --client 2>&1")
     assert_match "GitTreeState:\"clean\"", version_output
-    assert_match stable.instance_variable_get(:@resource).instance_variable_get(:@specs)[:revision], version_output if build.stable?
+    if build.stable?
+      assert_match stable.instance_variable_get(:@resource)
+                         .instance_variable_get(:@specs)[:revision],
+                   version_output
+    end
   end
 end
-
