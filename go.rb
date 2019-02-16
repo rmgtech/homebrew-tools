@@ -3,9 +3,9 @@ class Go < Formula
   homepage "https://golang.org"
 
   stable do
-    url "https://dl.google.com/go/go1.11.1.src.tar.gz"
-    mirror "https://fossies.org/linux/misc/go1.11.1.src.tar.gz"
-    sha256 "558f8c169ae215e25b81421596e8de7572bd3ba824b79add22fba6e284db1117"
+    url "https://dl.google.com/go/go1.11.5.src.tar.gz"
+    mirror "https://fossies.org/linux/misc/go1.11.5.src.tar.gz"
+    sha256 "bc1ef02bb1668835db1390a2e478dcbccb5dd16911691af9d75184bbe5aa943e"
 
     go_version = version.to_s.split(".")[0..1].join(".")
     resource "gotools" do
@@ -15,9 +15,9 @@ class Go < Formula
   end
 
   bottle do
-    sha256 "1725509d0bd6e3196ad61e332e8ecae08726dc4edb609f6197fd355d28c0bc89" => :mojave
-    sha256 "7470daceb0516695e04f087ca184731f646abb47d64968f7b09e266cefac9a1b" => :high_sierra
-    sha256 "88e2eb2ab4a409f0a68840624b1964b9e6d2314bce34498725a723b52a239639" => :sierra
+    sha256 "d67c2cf910dc40efa48b5c5f96c0fbf2012310bea4c39227d257c3f3e108c93b" => :mojave
+    sha256 "81de7cb46a2dcc5dd6248c53daac11dc6123ebaa9a03071d6cf4d578f7e26016" => :high_sierra
+    sha256 "6b3c580ad568f04cbaf3eb2dca9f4ce3bb11e071f7340b172a8a2ade2555ded4" => :sierra
   end
 
   head do
@@ -38,6 +38,12 @@ class Go < Formula
   end
 
   def install
+    # Temporary workaround for garbage folders which were included in the 1.11.5 release tarball
+    mv Dir.glob("go/*"), "./"
+    rm_rf "go"
+    rm_rf "gocache"
+    rm_rf "tmp"
+
     (buildpath/"gobootstrap").install resource("gobootstrap")
     ENV["GOROOT_BOOTSTRAP"] = buildpath/"gobootstrap"
 
@@ -56,6 +62,7 @@ class Go < Formula
 
     # Build and install godoc
     ENV.prepend_path "PATH", bin
+    ENV["GO111MODULE"] = "on"
     ENV["GOPATH"] = buildpath
     (buildpath/"src/golang.org/x/tools").install resource("gotools")
     cd "src/golang.org/x/tools/cmd/godoc/" do
@@ -63,15 +70,6 @@ class Go < Formula
       (libexec/"bin").install "godoc"
     end
     bin.install_symlink libexec/"bin/godoc"
-  end
-
-  def caveats; <<~EOS
-    A valid GOPATH is required to use the `go get` command.
-    If $GOPATH is not specified, $HOME/go will be used by default:
-      https://golang.org/doc/code.html#GOPATH
-    You may wish to add the GOROOT-based install location to your PATH:
-      export PATH=$PATH:#{opt_libexec}/bin
-  EOS
   end
 
   test do
